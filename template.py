@@ -5,7 +5,7 @@ import logging
 logging.basicConfig(level=logging.INFO, format='[%(asctime)s]: %(message)s:')
 
 
-project_name = "CNNclassifier"
+project_name = "cnnClassifier"
 # Cant create empty folders, so we can add .gitkeep
 
 list_of_files = [
