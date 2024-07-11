@@ -4,6 +4,9 @@ __pycache__/
 *$py.class
 cancer
 artifacts/*
+model/*
+dvc.lock
+.dvcignore
 
 # C extensions
 *.so

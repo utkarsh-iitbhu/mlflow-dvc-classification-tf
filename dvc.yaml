@@ -1,0 +1,96 @@
+# List all the stages, to remove repetition
+stages:
+  # This is the 1st pipeline
+  data_ingestion:
+    # It will run this pipeline
+    cmd: python src/cnnClassifier/pipeline/stage_01_data_ingestion.py
+    # Give all the dependencies
+    deps:
+      # Takes the file itself as dependencies
+      - src/cnnClassifier/pipeline/stage_01_data_ingestion.py
+      # Config yaml is also required to run it 
+      - config/config.yaml
+    outs:
+      # Outputs the result in this path to track
+      - artifacts/data_ingestion/Chest-CT-Scan-data
+
+  # 2nd pipeline detected
+  prepare_base_model:
+    # Run this pipeline file
+    cmd: python src/cnnClassifier/pipeline/stage_02_prepare_base_model.py
+    deps:
+      # keep deps as the same file and config.yaml
+      - src/cnnClassifier/pipeline/stage_02_prepare_base_model.py
+      - config/config.yaml
+    params:
+    # This is the parameter that will be passed to the pipeline
+      - IMAGE_SIZE
+      - INCLUDE_TOP
+      - CLASSES
+      - WEIGHTS
+      - LEARNING_RATE
+    outs:
+      # Outputs the model in this path to track
+      - artifacts/prepare_base_model
+
+  # 3rd training stage
+  training:
+    cmd: python src/cnnClassifier/pipeline/stage_03_model_trainer.py
+    deps:
+      # It requires pipeline, config, model, data
+      - src/cnnClassifier/pipeline/stage_03_model_trainer.py
+      - config/config.yaml
+      - artifacts/data_ingestion/Chest-CT-Scan-data
+      - artifacts/prepare_base_model
+    params:
+      # Params to add
+      - IMAGE_SIZE
+      - EPOCHS
+      - BATCH_SIZE
+      - AUGMENTATION
+    outs:
+      # Outputs the model in this path
+      - artifacts/training/model.h5
+
+  # 4th final evaluation
+  evaluation:
+    cmd: python src/cnnClassifier/pipeline/stage_04_model_evaluation_mlflow.py
+    deps:
+      - src/cnnClassifier/pipeline/stage_04_model_evaluation_mlflow.py
+      - config/config.yaml
+      - artifacts/data_ingestion/Chest-CT-Scan-data
+      - artifacts/training/model.h5
+    params:
+      - IMAGE_SIZE
+      - BATCH_SIZE
+    # Add metrics to track i.e scores.json
+    metrics:
+    - scores.json:
+        cache: false
+
+# To run dvc, install dvc library and u must have .git in root
+# Then run dvc repro, it will track and run your pipelines
+# On rerunning if there are no changes in any dir it will 
+# (cancer) (base) U:\mlflow-dvc-cancer>dvc repro
+# Stage 'data_ingestion' didn't change, skipping
+# Stage 'prepare_base_model' didn't change, skipping
+# Stage 'training' didn't change, skipping
+# Stage 'evaluation' didn't change, skipping
+# Data and pipelines are up to date.
+
+# (cancer) (base) U:\mlflow-dvc-cancer>dvc dag
+# +----------------+            +--------------------+ 
+# | data_ingestion |            | prepare_base_model |
+# +----------------+*****       +--------------------+
+#          *             *****             *
+#          *                  ******       *
+#          *                        ***    *
+#          **                        +----------+
+#            **                      | training |
+#              ***                   +----------+
+#                 ***             ***
+#                    **         **
+#                      **     **
+#                   +------------+
+#                   | evaluation |
+#                   +------------+
