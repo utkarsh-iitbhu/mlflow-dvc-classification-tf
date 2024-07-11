@@ -1,10 +1,11 @@
 import os
 from cnnClassifier.constants import * # This will import the paths for config and param yaml
-from cnnClassifier.utils.common import read_yaml, create_directories # Help me to read the yaml files
+from cnnClassifier.utils.common import read_yaml, create_directories, save_json # Help me to read the yaml files
 from cnnClassifier.entity.config_entity import (
     DataIngestionConfig,
     PrepareBaseModelConfig,
-    TrainingConfig)
+    TrainingConfig,
+    EvaluationConfig)
 # There is no functional difference between using parentheses or not. These two import statements are functionally equivalent
 
 class ConfigurationManager: # Read the config and param file paths
@@ -67,3 +68,14 @@ class ConfigurationManager: # Read the config and param file paths
         )
         
         return training_config
+
+    def get_evaluation_config(self) -> EvaluationConfig:
+        eval_config = EvaluationConfig( # Create a class
+            path_of_model="artifacts/training/model.h5", # Give path as they exist
+            training_data="artifacts/data_ingestion/Chest-CT-Scan-data",
+            mlflow_uri="https://dagshub.com/utkarsh-iitbhu/mlflow-dvc-classification-tf.mlflow",
+            all_params=self.params, # get all the params
+            params_image_size=self.params.IMAGE_SIZE,
+            params_batch_size=self.params.BATCH_SIZE
+        )
+        return eval_config

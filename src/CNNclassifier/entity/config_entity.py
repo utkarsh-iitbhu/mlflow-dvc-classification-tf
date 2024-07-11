@@ -34,3 +34,13 @@ class TrainingConfig:
     params_batch_size: int 
     params_is_augmentation: bool 
     params_image_size: list 
+    
+# This is to evaluate model
+@dataclass(frozen=True)
+class EvaluationConfig:
+    path_of_model: Path # Model path
+    training_data: Path # Data Path
+    all_params: dict # Get all the params as a dict
+    mlflow_uri: str # mlflow uri to target
+    params_image_size: list 
+    params_batch_size: int
