@@ -1,6 +1,7 @@
 from cnnClassifier.constants import * # This will import the paths for config and param yaml
 from cnnClassifier.utils.common import read_yaml, create_directories # Help me to read the yaml files
-from cnnClassifier.entity.config_entity import (DataIngestionConfig)
+from cnnClassifier.entity.config_entity import (DataIngestionConfig,PrepareBaseModelConfig)
+# There is no functional difference between using parentheses or not. These two import statements are functionally equivalent
 
 class ConfigurationManager: # Read the config and param file paths
     def __init__(self, config_filepath = CONFIG_FILE_PATH,
@@ -22,3 +23,22 @@ class ConfigurationManager: # Read the config and param file paths
             unzip_dir = config.unzip_dir
         ) 
         return data_ingestion_config
+
+    # Configuration.py
+    def get_prepare_base_model_config(self) -> PrepareBaseModelConfig:
+        config = self.config.prepare_base_model # Called from config.yaml
+        create_directories([config.root_dir]) # Dir for base model
+        
+        prepare_base_model_config = PrepareBaseModelConfig(
+            root_dir = Path(config.root_dir),
+            base_model_path = Path(config.base_model_path),
+            updated_base_model_path = Path(config.updated_base_model_path),
+            # Update the params now 
+            params_image_size=self.params.IMAGE_SIZE,
+            params_learning_rate=self.params.LEARNING_RATE,
+            params_include_top=self.params.INCLUDE_TOP,
+            params_weights=self.params.WEIGHTS,
+            params_classes=self.params.CLASSES
+        )
+
+        return prepare_base_model_config
