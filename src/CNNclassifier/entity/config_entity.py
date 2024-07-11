@@ -22,3 +22,15 @@ class PrepareBaseModelConfig:
     params_include_top: bool
     params_weights: str
     params_classes: int
+    
+# This is our Model training class 
+@dataclass(frozen=True)
+class TrainingConfig:
+    root_dir: Path 
+    trained_model_path: Path # Taken from the config.yaml
+    updated_base_model_path: Path # from artifacts/prepare_base_model/updated_base_model
+    training_data: Path # from artifacts/data_ingestion 
+    params_epochs: int # Rest are taken from the params.yaml
+    params_batch_size: int 
+    params_is_augmentation: bool 
+    params_image_size: list 
